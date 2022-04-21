@@ -24,7 +24,6 @@ class WaterfallNotchedRectangle extends NotchedShape {
   ///
   /// The notch is curve that smoothly connects the host's top edge and
   /// the guest circle.
-  // TODO(amirh): add an example diagram here.
   @override
   Path getOuterPath(Rect host, Rect? guest) {
     if (guest == null || !host.overlaps(guest)) return Path()..addRect(host);

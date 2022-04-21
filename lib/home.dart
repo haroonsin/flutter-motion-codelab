@@ -699,9 +699,7 @@ class _ReplyLogo extends StatelessWidget {
 }
 
 class _ReplyFab extends StatefulWidget {
-  const _ReplyFab({this.extended = false});
-
-  final bool extended;
+  const _ReplyFab();
 
   @override
   _ReplyFabState createState() => _ReplyFabState();

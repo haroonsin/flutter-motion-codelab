@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:animations/animations.dart';
 import 'package:provider/provider.dart';
 import 'package:reply/model/router_provider.dart';
 
@@ -738,41 +739,92 @@ class _ReplyFabState extends State<_ReplyFab>
         final tooltip = onMailView ? 'Reply' : 'Compose';
 
         // TODO: Add Container Transform from FAB to compose email page (Motion)
-        return Material(
-          color: theme.colorScheme.secondary,
-          shape: circleFabBorder,
-          child: Tooltip(
-            message: tooltip,
-            child: InkWell(
-              customBorder: circleFabBorder,
-              onTap: () {
-                Provider.of<EmailStore>(
-                  context,
-                  listen: false,
-                ).onCompose = true;
+        /*
+          onClosed is now also being set. onClosed is a ClosedCallback that is called when the OpenContainer route
+          has been popped or has returned to the closed state. 
+          The return value of that transaction is passed to this function as an argument. 
+          We use this Callback to notify our app's provider that we have left the ComposePage route,
+          so that it can notify all listeners.
+        */
 
-                Navigator.of(context).push(
-                  PageRouteBuilder(
-                    pageBuilder: (
-                      BuildContext context,
-                      Animation<double> animation,
-                      Animation<double> secondaryAnimation,
-                    ) {
-                      return const ComposePage();
-                    },
+        /*
+          Remove the Material widget from our widget since the OpenContainer widget handles the color of the widget 
+          returned by the closedBuilder with closedColor. We will also remove our Navigator.push() call inside of 
+          our InkWell widget's onTap, and replace it with the openContainer() Callback given by the OpenContainer 
+          widget's closedBuilder, since now the OpenContainer widget is handling its own routing.
+         */
+        return OpenContainer(
+          openBuilder: (context, closedContainer) {
+            return const ComposePage();
+          },
+          openColor: theme.cardColor,
+          onClosed: (success) {
+            Provider.of<EmailStore>(
+              context,
+              listen: false,
+            ).onCompose = false;
+          },
+          closedShape: circleFabBorder,
+          closedColor: theme.colorScheme.secondary,
+          closedElevation: 6,
+          closedBuilder: (context, openContainer) {
+            return Tooltip(
+              message: tooltip,
+              child: InkWell(
+                customBorder: circleFabBorder,
+                onTap: () {
+                  Provider.of<EmailStore>(
+                    context,
+                    listen: false,
+                  ).onCompose = true;
+                  openContainer();
+                },
+                child: SizedBox(
+                  height: _mobileFabDimension,
+                  width: _mobileFabDimension,
+                  child: Center(
+                    child: fabSwitcher,
                   ),
-                );
-              },
-              child: SizedBox(
-                height: _mobileFabDimension,
-                width: _mobileFabDimension,
-                child: Center(
-                  child: fabSwitcher,
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
+        // return Material(
+        //   color: theme.colorScheme.secondary,
+        //   shape: circleFabBorder,
+        //   child: Tooltip(
+        //     message: tooltip,
+        //     child: InkWell(
+        //       customBorder: circleFabBorder,
+        //       onTap: () {
+        //         Provider.of<EmailStore>(
+        //           context,
+        //           listen: false,
+        //         ).onCompose = true;
+
+        //         Navigator.of(context).push(
+        //           PageRouteBuilder(
+        //             pageBuilder: (
+        //               BuildContext context,
+        //               Animation<double> animation,
+        //               Animation<double> secondaryAnimation,
+        //             ) {
+        //               return const ComposePage();
+        //             },
+        //           ),
+        //         );
+        //       },
+        //       child: SizedBox(
+        //         height: _mobileFabDimension,
+        //         width: _mobileFabDimension,
+        //         child: Center(
+        //           child: fabSwitcher,
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // );
       },
     );
   }

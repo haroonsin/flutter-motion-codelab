@@ -73,7 +73,12 @@ class MailViewRouterDelegate extends RouterDelegate<void>
     // Handles the back button when on the [ComposePage].
     if (onCompose) {
       // TODO: Add Container Transform from FAB to compose email page (Motion)
-      emailStore.onCompose = false;
+      /*
+        Since our OpenContainer widget now handles notifying our app's provider 
+        that we are no longer on the ComposePage through the onClosed ClosedCallback,
+        we can remove our previous implementation in mail_view_router.dart:
+      */
+      // emailStore.onCompose = false;
       return SynchronousFuture<bool>(false);
     }
 

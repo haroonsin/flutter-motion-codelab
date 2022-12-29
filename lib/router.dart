@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -47,14 +48,14 @@ class ReplyRouterDelegate extends RouterDelegate<ReplyRoutePath>
             onPopPage: _handlePopPage,
             pages: [
               // TODO: Add Shared Z-Axis transition from search icon to search view page (Motion)
-              const CustomTransitionPage(
+              const SharedAxisTransitionPageWrapper(
                 transitionKey: ValueKey('Home'),
                 screen: HomePage(),
               ),
               // Listens to app's state to check if we have set the route to the ReplySearchPath.
               // If we have, then it rebuilds our navigator with the SearchPage at the top of the stack.
               if (routePath is ReplySearchPath)
-                const CustomTransitionPage(
+                const SharedAxisTransitionPageWrapper(
                   transitionKey: ValueKey('Search'),
                   screen: SearchPage(),
                 ),
@@ -97,7 +98,48 @@ class ReplySearchPath extends ReplyRoutePath {
   const ReplySearchPath();
 }
 
+/**
+ * A shared axis transition in the animations package is called an SharedAxisTransition. 
+ * This widget has the following properties:
+ *
+ *  fillColor: The color used for the background during the transition.
+ *  animation: The animation driving the child's entrance and exit.
+ *  secondaryAnimation: The animation that transitions the child when new content is pushed on top of it.
+ *  transitionType: Choose between scaled, horizontal, and vertical types of shared axis transition.
+ *  child: The widget transitioning in and out.
+ * 
+ *  It is important that when we would like to transition between two elements 
+ *  that we assign a different transitionKey to each element. 
+ *  Without a unique transitionKey the framework will fail to differentiate between them, 
+ *  so it will not show a transition.
+ */
 // TODO: Add Shared Z-Axis transition from search icon to search view page (Motion)
+class SharedAxisTransitionPageWrapper extends Page {
+  const SharedAxisTransitionPageWrapper(
+      {required this.screen, required this.transitionKey})
+      : super(key: transitionKey);
+
+  final Widget screen;
+  final ValueKey transitionKey;
+
+  @override
+  Route createRoute(BuildContext context) {
+    return PageRouteBuilder(
+        settings: this,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SharedAxisTransition(
+            fillColor: Theme.of(context).cardColor,
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            transitionType: SharedAxisTransitionType.scaled,
+            child: child,
+          );
+        },
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return screen;
+        });
+  }
+}
 
 class ReplyRouteInformationParser
     extends RouteInformationParser<ReplyRoutePath> {

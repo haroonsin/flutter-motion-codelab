@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:animations/animations.dart';
 
 import 'colors.dart';
 import 'home.dart';
@@ -45,76 +46,131 @@ class MailPreviewCard extends StatelessWidget {
         'Starred';
 
     // TODO: Add Container Transform transition from email list to email detail page (Motion)
-    return Material(
-      color: theme.cardColor,
-      child: InkWell(
-        onTap: () {
-          Provider.of<EmailStore>(
-            context,
-            listen: false,
-          ).currentlySelectedEmailId = id;
-
-          mobileMailNavKey.currentState!.push(
-            PageRouteBuilder(
-              pageBuilder: (BuildContext context, Animation<double> animation,
-                  Animation<double> secondaryAnimation) {
-                return MailViewPage(id: id, email: email);
-              },
-            ),
-          );
+    return _OpenContainerWrapper(
+      id: id,
+      email: email,
+      closedChild: Dismissible(
+        key: ObjectKey(email),
+        dismissThresholds: const {
+          DismissDirection.startToEnd: 0.8,
+          DismissDirection.endToStart: 0.4,
         },
-        child: Dismissible(
-          key: ObjectKey(email),
-          dismissThresholds: const {
-            DismissDirection.startToEnd: 0.8,
-            DismissDirection.endToStart: 0.4,
-          },
-          onDismissed: (direction) {
-            switch (direction) {
-              case DismissDirection.endToStart:
-                if (onStarredInbox) {
-                  onStar();
-                }
-                break;
-              case DismissDirection.startToEnd:
-                onDelete();
-                break;
-              default:
-            }
-          },
-          background: _DismissibleContainer(
-            icon: 'twotone_delete',
-            backgroundColor: colorScheme.primary,
-            iconColor: ReplyColors.blue50,
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsetsDirectional.only(start: 20),
-          ),
-          confirmDismiss: (direction) async {
-            if (direction == DismissDirection.endToStart) {
+        onDismissed: (direction) {
+          switch (direction) {
+            case DismissDirection.endToStart:
               if (onStarredInbox) {
-                return true;
+                onStar();
               }
-              onStar();
-              return false;
-            } else {
+              break;
+            case DismissDirection.startToEnd:
+              onDelete();
+              break;
+            default:
+          }
+        },
+        background: _DismissibleContainer(
+          icon: 'twotone_delete',
+          backgroundColor: colorScheme.primary,
+          iconColor: ReplyColors.blue50,
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsetsDirectional.only(start: 20),
+        ),
+        confirmDismiss: (direction) async {
+          if (direction == DismissDirection.endToStart) {
+            if (onStarredInbox) {
               return true;
             }
-          },
-          secondaryBackground: _DismissibleContainer(
-            icon: 'twotone_star',
-            backgroundColor: currentEmailStarred
-                ? colorScheme.secondary
-                : theme.scaffoldBackgroundColor,
-            iconColor: currentEmailStarred
-                ? colorScheme.onSecondary
-                : colorScheme.onBackground,
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsetsDirectional.only(end: 20),
-          ),
-          child: mailPreview,
+            onStar();
+            return false;
+          } else {
+            return true;
+          }
+        },
+        secondaryBackground: _DismissibleContainer(
+          icon: 'twotone_star',
+          backgroundColor: currentEmailStarred
+              ? colorScheme.secondary
+              : theme.scaffoldBackgroundColor,
+          iconColor: currentEmailStarred
+              ? colorScheme.onSecondary
+              : colorScheme.onBackground,
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsetsDirectional.only(end: 20),
         ),
+        child: mailPreview,
       ),
     );
+
+    // return Material(
+    //   color: theme.cardColor,
+    //   child: InkWell(
+    //     onTap: () {
+    //       Provider.of<EmailStore>(
+    //         context,
+    //         listen: false,
+    //       ).currentlySelectedEmailId = id;
+
+    //       mobileMailNavKey.currentState!.push(
+    //         PageRouteBuilder(
+    //           pageBuilder: (BuildContext context, Animation<double> animation,
+    //               Animation<double> secondaryAnimation) {
+    //             return MailViewPage(id: id, email: email);
+    //           },
+    //         ),
+    //       );
+    //     },
+    //     child: Dismissible(
+    //       key: ObjectKey(email),
+    //       dismissThresholds: const {
+    //         DismissDirection.startToEnd: 0.8,
+    //         DismissDirection.endToStart: 0.4,
+    //       },
+    //       onDismissed: (direction) {
+    //         switch (direction) {
+    //           case DismissDirection.endToStart:
+    //             if (onStarredInbox) {
+    //               onStar();
+    //             }
+    //             break;
+    //           case DismissDirection.startToEnd:
+    //             onDelete();
+    //             break;
+    //           default:
+    //         }
+    //       },
+    //       background: _DismissibleContainer(
+    //         icon: 'twotone_delete',
+    //         backgroundColor: colorScheme.primary,
+    //         iconColor: ReplyColors.blue50,
+    //         alignment: Alignment.centerLeft,
+    //         padding: const EdgeInsetsDirectional.only(start: 20),
+    //       ),
+    //       confirmDismiss: (direction) async {
+    //         if (direction == DismissDirection.endToStart) {
+    //           if (onStarredInbox) {
+    //             return true;
+    //           }
+    //           onStar();
+    //           return false;
+    //         } else {
+    //           return true;
+    //         }
+    //       },
+    //       secondaryBackground: _DismissibleContainer(
+    //         icon: 'twotone_star',
+    //         backgroundColor: currentEmailStarred
+    //             ? colorScheme.secondary
+    //             : theme.scaffoldBackgroundColor,
+    //         iconColor: currentEmailStarred
+    //             ? colorScheme.onSecondary
+    //             : colorScheme.onBackground,
+    //         alignment: Alignment.centerRight,
+    //         padding: const EdgeInsetsDirectional.only(end: 20),
+    //       ),
+    //       child: mailPreview,
+    //     ),
+    //   ),
+    // );
   }
 }
 
@@ -291,6 +347,64 @@ class _MailPreviewActionBar extends StatelessWidget {
       children: [
         ProfileAvatar(avatar: avatar),
       ],
+    );
+  }
+}
+
+/*
+ Returns a child widget, closedChild, wrapped in an OpenContainer widget. 
+ The OpenContainer widget comes from the animations package and is the source of our open container transform. Here are what some of its properties do:
+
+    - openBuilder is the function that is called when the OpenContainer wants to obtain the child for its open state. 
+      Likewise, the closedBuilder does the same but for the closed state of the OpenContainer. 
+    - The action Callback given to both builders can be used to open and close the containers respectively. 
+      We use the action Callback , openContainer(), given to the closedBuilder and 
+      pass it to our InkWell widget's onTap, so a tap on the InkWell can trigger an opening of the container.
+    - openColor is the background color of the container while it is open, 
+      while the closedColor is the background color while it is closed.
+    - closedShape is the shape of the container while it is closed, 
+      similarly there is also openShape that defines the shape of the container while it is open.
+    - closedElevation is the elevation of the container while it is closed, and
+      openElevation is the elevation of the container when it is open.
+    - During the transition the container transitions between open and closed properties in one smooth animation.
+
+*/
+class _OpenContainerWrapper extends StatelessWidget {
+  const _OpenContainerWrapper({
+    required this.id,
+    required this.email,
+    required this.closedChild,
+  });
+
+  final int id;
+  final Email email;
+  final Widget closedChild;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return OpenContainer(
+      openBuilder: (context, closedContainer) {
+        return MailViewPage(id: id, email: email);
+      },
+      openColor: theme.cardColor,
+      closedShape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(0)),
+      ),
+      closedElevation: 0,
+      closedColor: theme.cardColor,
+      closedBuilder: (context, openContainer) {
+        return InkWell(
+          onTap: () {
+            Provider.of<EmailStore>(
+              context,
+              listen: false,
+            ).currentlySelectedEmailId = id;
+            openContainer();
+          },
+          child: closedChild,
+        );
+      },
     );
   }
 }

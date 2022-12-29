@@ -51,6 +51,8 @@ class ReplyRouterDelegate extends RouterDelegate<ReplyRoutePath>
                 transitionKey: ValueKey('Home'),
                 screen: HomePage(),
               ),
+              // Listens to app's state to check if we have set the route to the ReplySearchPath.
+              // If we have, then it rebuilds our navigator with the SearchPage at the top of the stack.
               if (routePath is ReplySearchPath)
                 const CustomTransitionPage(
                   transitionKey: ValueKey('Search'),

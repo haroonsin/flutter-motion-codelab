@@ -19,6 +19,8 @@ class MailViewRouterDelegate extends RouterDelegate<void>
       return false;
     }
 
+    // Inner navigator.
+    //It handles our app's inner screens that consume only the body of the canvas, such as the InboxPage.
     return Selector<EmailStore, String>(
       selector: (context, emailStore) => emailStore.currentlySelectedInbox,
       builder: (context, currentlySelectedInbox, child) {

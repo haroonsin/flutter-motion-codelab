@@ -143,6 +143,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  /**
+   * Access our EmailStore and set its currentlySelectedInbox to the selected destination. 
+   * Our EmailStore keeps track of our inner navigators state.
+   */
   void _onDestinationSelected(String destination) {
     var emailStore = Provider.of<EmailStore>(
       context,
@@ -547,6 +551,9 @@ class _BottomAppBarActionItems extends StatelessWidget {
                       icon: const Icon(Icons.search),
                       color: ReplyColors.white50,
                       onPressed: () {
+                        // access our RouterProvider and set its routePath to ReplySearchPath.
+                        // Our RouterProvider keeps track of our root navigators state.
+
                         Provider.of<RouterProvider>(
                           context,
                           listen: false,
